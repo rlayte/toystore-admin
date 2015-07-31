@@ -1,4 +1,4 @@
-package admin
+package main
 
 import (
 	"bytes"
@@ -6,16 +6,19 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 
 	"github.com/aymerick/raymond"
 	"github.com/julienschmidt/httprouter"
 	"github.com/rlayte/toystore"
+	"github.com/rlayte/toystore/adapters/memory"
 )
 
 var Toy *toystore.Toystore
 
 func Favicon(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	output, err := ioutil.ReadFile("admin/public/favicon.ico")
+	output, err := ioutil.ReadFile("public/favicon.ico")
 	if err != nil {
 		panic(err)
 	}
@@ -23,7 +26,7 @@ func Favicon(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 }
 
 func Home() func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	contents, err := ioutil.ReadFile("admin/views/home.html")
+	contents, err := ioutil.ReadFile("views/home.html")
 	if err != nil {
 		panic(err)
 	}
@@ -93,7 +96,7 @@ func Serve(t *toystore.Toystore) {
 	router.GET("/", Home())
 	router.GET("/toystore/force.csv", GraphData)
 	router.GET("/favicon.ico", Favicon)
-	router.ServeFiles("/static/*filepath", http.Dir("admin/public"))
+	router.ServeFiles("/static/*filepath", http.Dir("public"))
 	router.GET("/api", Get)
 	router.POST("/api", Put)
 
@@ -132,4 +135,23 @@ func GraphData(w http.ResponseWriter, r *http.Request, params httprouter.Params)
 	buf.WriteString(",1\n") // Not sure what value does.
 
 	w.Write(buf.Bytes())
+}
+
+func main() {
+	var seed string
+	if len(os.Args) != 2 {
+		fmt.Printf("usage: %s [port]", os.Args[0])
+		os.Exit(1)
+	}
+	port, err := strconv.Atoi(os.Args[1])
+
+	if err != nil {
+		panic(err)
+	}
+
+	if port != 3000 {
+		seed = ":3010"
+	}
+
+	Serve(toystore.New(port, memory.New(), seed, toystore.ToystoreMetaData{RPCAddress: ":3020"}))
 }
