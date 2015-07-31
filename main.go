@@ -100,8 +100,6 @@ func Serve(t *toystore.Toystore) {
 	router.GET("/api", Get)
 	router.POST("/api", Put)
 
-	go toystore.ServeRPC(t)
-
 	log.Println("Running server on port", t.Port)
 	log.Fatal(http.ListenAndServe(t.Address(), router))
 }
@@ -153,5 +151,6 @@ func main() {
 		seed = ":3010"
 	}
 
-	Serve(toystore.New(port, memory.New(), seed, toystore.ToystoreMetaData{RPCAddress: ":3020"}))
+	metaData := toystore.ToystoreMetaData{RPCAddress: ":3020"}
+	Serve(toystore.New(port, memory.New(), seed, metaData))
 }
