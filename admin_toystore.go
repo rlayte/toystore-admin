@@ -138,7 +138,7 @@ func GraphData(w http.ResponseWriter, r *http.Request, params httprouter.Params)
 func main() {
 	var seed string
 	if len(os.Args) != 2 {
-		fmt.Printf("usage: %s [port]", os.Args[0])
+		fmt.Printf("usage: %s [port]\n", os.Args[0])
 		os.Exit(1)
 	}
 	port, err := strconv.Atoi(os.Args[1])
