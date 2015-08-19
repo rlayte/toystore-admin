@@ -39,7 +39,7 @@ func Home() func(w http.ResponseWriter, r *http.Request, params httprouter.Param
 
 		var ring_string string
 
-		fmt.Println(Toy.Ring)
+		// fmt.Println(Toy.Ring)
 		if Toy.Ring == nil {
 			ring_string = ""
 		} else {
@@ -138,7 +138,7 @@ func GraphData(w http.ResponseWriter, r *http.Request, params httprouter.Params)
 func main() {
 	var seed string
 	if len(os.Args) != 2 {
-		fmt.Printf("usage: %s [port]\n", os.Args[0])
+		fmt.Printf("usage: %s [port] [seed]\n", os.Args[0])
 		os.Exit(1)
 	}
 	port, err := strconv.Atoi(os.Args[1])
@@ -147,10 +147,18 @@ func main() {
 		panic(err)
 	}
 
-	if port != 3000 {
-		seed = ":3010"
-	}
+	// This section  is gross:
+
+	seed_port := 3000
+
+	// Seed for gossip protocol
+	seed = ":3010"
 
 	metaData := toystore.ToystoreMetaData{RPCAddress: ":3020"}
-	Serve(toystore.New(port, memory.New(), seed, metaData))
+	if port == seed_port {
+		log.Println("Seed node")
+		Serve(toystore.New(port, memory.New(), "", metaData))
+	} else {
+		Serve(toystore.New(port, memory.New(), seed, metaData))
+	}
 }
