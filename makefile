@@ -8,6 +8,9 @@ clean:
 
 data: a b c d e
 
+seed:
+	go run ./admin_toystore.go 3000
+
 a:
 	curl -X POST -F key=a -F data=1 localhost:3000/api
 b:
